@@ -1,0 +1,106 @@
+@startuml
+title Secuencia 1 - Cliente Exigente aplica burnout
+
+autonumber
+scale max 3800*3800
+skinparam responseMessageBelowArrow true
+
+participant "batalla: Batalla" as B
+participant "cliente: ClienteExigente" as C
+participant "habilidad: AplicarEstado" as H
+participant "empleado: Empleado" as E
+
+note over B,E
+  Escenario exitoso: turno enemigo ya preparado.
+  Cliente activo, puede actuar y dispone de energia.
+  La habilidad le pertenece y el objetivo es un empleado activo.
+  La interfaz queda fuera de esta vista del modelo.
+end note
+
+[-> B : ejecutarTurnoEnemigo()
+activate B
+
+B -> B : obtenerCombatienteActual()
+B --> B : cliente
+
+B -> C : ejecutarAccion(equipo)
+activate C
+
+note right of C
+  En este turno su comportamiento
+  selecciona burnout y un empleado activo.
+end note
+
+C -> C : usarHabilidad(habilidad, empleado)
+activate C
+
+C -> H : objetivoValido(cliente, empleado)
+H --> C : true
+
+C -> C : gastarEnergia(costoEnergia)
+C --> C : true
+
+C -> H : aplicar(cliente, empleado)
+activate H
+
+H -> H : crearEstado()
+
+create participant "nuevo: Burnout" as N
+H -> N : <<create>>
+
+H -> E : agregarEstado(nuevo)
+activate E
+
+alt Ya tiene burnout
+    participant "existente: Burnout" as X
+
+    E -> X : sumarDuracion(duracionNueva)
+
+    note right of E
+      Se conserva la potencia del existente.
+      El nuevo efecto no se agrega a la lista.
+    end note
+
+else No tiene burnout
+    note right of E
+      Incorpora nuevo a su lista de estados.
+      No causa danio inmediato: actuara
+      al inicio del turno del afectado.
+    end note
+end
+
+E --> H : retorno
+deactivate E
+
+H --> C : retorno
+deactivate H
+
+C --> C : true
+deactivate C
+
+C --> B : retorno
+deactivate C
+
+B -> B : cerrarTurno()
+
+B -> C : finalizarTurno()
+C --> B : retorno
+
+B -> B : verificarFin()
+
+B -> B : estaFinalizada()
+B --> B : false
+
+B -> B : avanzarTurno()
+B -> B : prepararTurno()
+
+note over B
+  Preparar el siguiente turno procesa sus estados.
+  Se omiten esos pasos internos en este escenario.
+end note
+
+[<-- B : retorno
+deactivate B
+
+@enduml
+

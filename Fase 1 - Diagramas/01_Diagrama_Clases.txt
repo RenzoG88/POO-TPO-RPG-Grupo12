@@ -1,0 +1,405 @@
+@startuml
+scale max 3800*3800
+title Diagrama de clases
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+hide empty members
+
+package "Partida y progresion" {
+
+    enum EtapaPartida {
+        PREPARACION
+        COMBATE
+        ELECCION_MEJORA
+        FINALIZADA
+    }
+
+    enum TipoMejora {
+        EXPERIENCIA
+        CREDITOS
+    }
+
+    class Partida {
+        - equipo: Equipo
+        - tienda: Tienda
+        - batallaActual: Batalla
+        - generador: GeneradorEncuentros
+        - etapa: EtapaPartida
+        - ciclo: int
+        - estres: int
+        - limiteEstres: int = 5
+        - multiplicadorExperiencia: double
+        - multiplicadorCreditos: double
+        + iniciarNueva(): void
+        + iniciarSiguienteCombate(): Batalla
+        + procesarFinCombate(): void
+        + elegirMejora(tipo: TipoMejora): boolean
+        + comprar(oferta: Oferta): boolean
+        + equipar(empleado: Empleado, objeto: Equipamiento): boolean
+        + desequipar(empleado: Empleado, objeto: Equipamiento): boolean
+        + usarConsumible(item: Consumible, objetivo: Empleado): boolean
+        + puedeGuardar(): boolean
+        + estaFinalizada(): boolean
+    }
+
+    class GeneradorEncuentros {
+        + crearEnemigos(ciclo: int, esJefe: boolean): List<Enemigo>
+    }
+
+    class Recompensa {
+        - experiencia: int
+        - creditos: int
+        + calcularExperiencia(multiplicador: double): int
+        + calcularCreditos(multiplicador: double): int
+    }
+
+    class PersistenciaPartida {
+        + guardar(partida: Partida, ruta: String): void
+        + cargar(ruta: String): Partida
+    }
+}
+
+package "Equipo y combatientes" {
+
+    class Equipo {
+        - empleados: List<Empleado>
+        - inventario: Inventario
+        + obtenerActivos(): List<Empleado>
+        + pertenece(empleado: Empleado): boolean
+        + estanTodosDespedidos(): boolean
+        + repartirExperiencia(cantidad: int): void
+        + equipar(empleado: Empleado, objeto: Equipamiento): boolean
+        + desequipar(empleado: Empleado, objeto: Equipamiento): boolean
+        + usarConsumible(item: Consumible, objetivo: Empleado): boolean
+        + obtenerInventario(): Inventario
+    }
+
+    abstract class Combatiente {
+        - nombre: String
+        - vida: int
+        - vidaMaxima: int
+        - energia: int
+        - energiaMaxima: int
+        - ataque: int
+        - defensa: int
+        - velocidad: int
+        - defendiendo: boolean
+        - habilidades: List<Habilidad>
+        - estados: List<EfectoEstado>
+        + estaActivo(): boolean
+        + obtenerAtaqueTotal(): int
+        + obtenerDefensaTotal(): int
+        + obtenerVelocidad(): int
+        + recibirDanio(cantidad: int): void
+        + curar(cantidad: int): void
+        + recuperarEnergia(cantidad: int): void
+        + gastarEnergia(cantidad: int): boolean
+        + atacar(objetivo: Combatiente): void
+        + defender(): void
+        + usarHabilidad(habilidad: Habilidad, objetivo: Combatiente): boolean
+        + agregarEstado(estado: EfectoEstado): void
+        + iniciarTurno(): void
+        + puedeActuar(): boolean
+        + finalizarTurno(): void
+        + limpiarEstados(): void
+    }
+
+    abstract class Empleado {
+        - nivel: int
+        - experiencia: int
+        - herramienta: Herramienta
+        - proteccion: Proteccion
+        + ganarExperiencia(cantidad: int): void
+        - subirNivel(): void
+        + estaDespedido(): boolean
+        + obtenerAtaqueTotal(): int
+        + obtenerDefensaTotal(): int
+        + cambiarHerramienta(nueva: Herramienta): Herramienta
+        + cambiarProteccion(nueva: Proteccion): Proteccion
+    }
+
+    class Ciberseguridad
+    class Infraestructura
+    class Backend
+    class Frontend
+
+    abstract class Enemigo {
+        + ejecutarAccion(equipo: Equipo): void
+    }
+
+    class UsuarioPhishing {
+        + ejecutarAccion(equipo: Equipo): void
+    }
+
+    class ClienteExigente {
+        + ejecutarAccion(equipo: Equipo): void
+    }
+
+    class Burocrata {
+        + ejecutarAccion(equipo: Equipo): void
+    }
+
+    class JefeEmpresa {
+        + ejecutarAccion(equipo: Equipo): void
+    }
+}
+
+package "Combate y habilidades" {
+
+    class Batalla {
+        - equipo: Equipo
+        - enemigos: List<Enemigo>
+        - ordenTurnos: List<Combatiente>
+        - indiceTurno: int
+        - ronda: int
+        - esJefe: boolean
+        - finalizada: boolean
+        - recompensa: Recompensa
+        + iniciar(): void
+        + obtenerCombatienteActual(): Combatiente
+        + atacar(objetivo: Combatiente): boolean
+        + defender(): boolean
+        + usarHabilidad(habilidad: Habilidad, objetivo: Combatiente): boolean
+        + usarItem(item: Consumible, objetivo: Empleado): boolean
+        + ejecutarTurnoEnemigo(): void
+        + estaFinalizada(): boolean
+        + fueVictoria(): boolean
+        + esCombateJefe(): boolean
+        + obtenerRecompensa(): Recompensa
+        - iniciarRonda(): void
+        - prepararTurno(): void
+        - cerrarTurno(): void
+        - avanzarTurno(): void
+        - verificarFin(): void
+    }
+
+    abstract class Habilidad {
+        - nombre: String
+        - costoEnergia: int
+        + objetivoValido(emisor: Combatiente, objetivo: Combatiente): boolean
+        + aplicar(emisor: Combatiente, objetivo: Combatiente): void
+    }
+
+    class AtaquePotenciado {
+        - multiplicador: double
+        - cantidadGolpes: int
+        + aplicar(emisor: Combatiente, objetivo: Combatiente): void
+    }
+
+    class Reparacion {
+        - cantidad: int
+        + aplicar(emisor: Combatiente, objetivo: Combatiente): void
+    }
+
+    class AplicarEstado {
+        - tipo: TipoEstado
+        - duracion: int
+        - potencia: int
+        + aplicar(emisor: Combatiente, objetivo: Combatiente): void
+        - crearEstado(): EfectoEstado
+    }
+}
+
+package "Estados temporales" {
+
+    enum TipoEstado {
+        BURNOUT
+        TICKET_PENDIENTE
+        FIREWALL_ACTIVO
+    }
+
+    abstract class EfectoEstado {
+        - turnosRestantes: int
+        + obtenerTipo(): TipoEstado
+        + sumarDuracion(turnos: int): void
+        + alIniciarTurno(afectado: Combatiente): void
+        + permiteActuar(): boolean
+        + modificarDanioRecibido(cantidad: int): int
+        + alFinalizarTurno(): void
+        + haExpirado(): boolean
+    }
+
+    class Burnout {
+        - danioPorTurno: int
+        + alIniciarTurno(afectado: Combatiente): void
+    }
+
+    class TicketPendiente {
+        + permiteActuar(): boolean
+    }
+
+    class FirewallActivo {
+        - porcentajeReduccion: int
+        + modificarDanioRecibido(cantidad: int): int
+    }
+}
+
+package "Inventario y tienda" {
+
+    class Inventario {
+        - creditos: int
+        - items: List<Item>
+        + obtenerCreditos(): int
+        + agregarCreditos(cantidad: int): void
+        + gastarCreditos(cantidad: int): boolean
+        + contiene(item: Item): boolean
+        + agregarItem(item: Item): void
+        + retirarItem(item: Item): boolean
+        + usarConsumible(item: Consumible, objetivo: Empleado): boolean
+    }
+
+    abstract class Item {
+        - nombre: String
+    }
+
+    abstract class Equipamiento
+
+    class Herramienta {
+        - bonusAtaque: int
+        + obtenerBonusAtaque(): int
+    }
+
+    class Proteccion {
+        - bonusDefensa: int
+        + obtenerBonusDefensa(): int
+    }
+
+    abstract class Consumible {
+        + puedeAplicarse(objetivo: Empleado): boolean
+        + aplicar(objetivo: Empleado): void
+    }
+
+    class Snack {
+        - recuperacionVida: int
+        + aplicar(objetivo: Empleado): void
+    }
+
+    class Cafe {
+        - recuperacionEnergia: int
+        + aplicar(objetivo: Empleado): void
+    }
+
+    class Tienda {
+        - ofertas: List<Oferta>
+        + renovarOfertas(ciclo: int): void
+        + comprar(oferta: Oferta, inventario: Inventario): boolean
+    }
+
+    class Oferta {
+        - item: Item
+        - precio: int
+        - vendida: boolean
+        + estaDisponible(): boolean
+        + obtenerItem(): Item
+        + obtenerPrecio(): int
+        + marcarVendida(): void
+    }
+}
+
+' --- Partida ---
+
+Partida "1" *-- "1" Equipo
+Partida "1" *-- "1" Tienda
+Partida "1" *-- "0..1" Batalla : actual
+Partida --> "1" GeneradorEncuentros
+
+Partida ..> EtapaPartida
+Partida ..> TipoMejora
+GeneradorEncuentros ..> Enemigo : crea
+PersistenciaPartida ..> Partida : guarda / recupera
+
+' --- Equipo y personajes ---
+
+Equipo "1" *-- "4" Empleado
+Equipo "1" *-- "1" Inventario
+
+Combatiente <|-- Empleado
+Combatiente <|-- Enemigo
+
+Empleado <|-- Ciberseguridad
+Empleado <|-- Infraestructura
+Empleado <|-- Backend
+Empleado <|-- Frontend
+
+Enemigo <|-- UsuarioPhishing
+Enemigo <|-- ClienteExigente
+Enemigo <|-- Burocrata
+Enemigo <|-- JefeEmpresa
+
+Empleado --> "0..1" Herramienta : equipada
+Empleado --> "0..1" Proteccion : equipada
+
+' --- Combate ---
+
+Batalla --> "1" Equipo
+Batalla "1" *-- "1..*" Enemigo
+Batalla --> "0..*" Combatiente : orden
+Batalla "1" *-- "1" Recompensa
+
+' --- Habilidades ---
+
+Combatiente "1" *-- "0..*" Habilidad
+
+Habilidad <|-- AtaquePotenciado
+Habilidad <|-- Reparacion
+Habilidad <|-- AplicarEstado
+
+AplicarEstado ..> EfectoEstado : crea
+AplicarEstado ..> TipoEstado
+
+' --- Estados ---
+
+Combatiente "1" *-- "0..*" EfectoEstado
+
+EfectoEstado <|-- Burnout
+EfectoEstado <|-- TicketPendiente
+EfectoEstado <|-- FirewallActivo
+
+EfectoEstado ..> TipoEstado
+
+' --- Objetos y tienda ---
+
+Inventario --> "0..*" Item : disponibles
+
+Item <|-- Equipamiento
+Item <|-- Consumible
+
+Equipamiento <|-- Herramienta
+Equipamiento <|-- Proteccion
+
+Consumible <|-- Snack
+Consumible <|-- Cafe
+
+Tienda "1" *-- "0..*" Oferta
+Oferta --> "1" Item
+
+note bottom of Ciberseguridad
+  Habilidad inicial: Firewall
+  Tipo: AplicarEstado
+  Estado: FIREWALL_ACTIVO
+  Objetivo: aliado activo o el propio empleado
+end note
+
+note bottom of Infraestructura
+  Habilidad inicial: Reiniciar servicio
+  Tipo: Reparacion
+  Objetivo: aliado activo o el propio empleado
+end note
+
+note bottom of Backend
+  Habilidad inicial: Proceso pesado
+  Tipo: AtaquePotenciado
+  Un golpe de mayor potencia
+  Objetivo: enemigo activo
+end note
+
+note bottom of Frontend
+  Habilidad inicial: Doble renderizado
+  Tipo: AtaquePotenciado
+  Dos golpes de menor potencia
+  Objetivo: enemigo activo
+end note
+
+@enduml
+

@@ -1,0 +1,82 @@
+@startuml
+title Secuencia 2 - Comprar un cafe en la tienda
+
+autonumber
+scale max 3800*3800
+skinparam responseMessageBelowArrow true
+
+actor Jugador as J
+participant "partida: Partida" as P
+participant "equipo: Equipo" as E
+participant "tienda: Tienda" as T
+participant "oferta: Oferta" as O
+participant "inventario: Inventario" as I
+
+note over J,I
+  El jugador selecciono una oferta de cafe.
+  Se omiten las pantallas: se muestra la entrada al modelo.
+end note
+
+J -> P : comprar(oferta)
+activate P
+
+alt etapa distinta de PREPARACION
+    P --> J : false
+
+else etapa PREPARACION
+    P -> E : obtenerInventario()
+    E --> P : inventario
+
+    P -> T : comprar(oferta, inventario)
+    activate T
+
+    alt La oferta no pertenece a la tienda
+        T --> P : false
+
+    else La oferta pertenece a la tienda
+        T -> O : estaDisponible()
+        O --> T : disponible
+
+        alt Oferta vendida
+            T --> P : false
+
+        else Oferta disponible
+            T -> O : obtenerPrecio()
+            O --> T : precio
+
+            T -> I : gastarCreditos(precio)
+            activate I
+
+            note right of I
+              Si no alcanza el saldo devuelve false
+              y conserva los creditos.
+              Si alcanza, descuenta y devuelve true.
+            end note
+
+            I --> T : pagoRealizado
+            deactivate I
+
+            alt Creditos insuficientes
+                T --> P : false
+
+            else Pago realizado
+                T -> O : obtenerItem()
+                O --> T : cafe
+
+                T -> I : agregarItem(cafe)
+                I --> T : retorno
+
+                T -> O : marcarVendida()
+                O --> T : retorno
+
+                T --> P : true
+            end
+        end
+    end
+
+    deactivate T
+    P --> J : resultado de la compra
+end
+
+deactivate P
+@enduml
