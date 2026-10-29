@@ -56,4 +56,8 @@ public class Inventario {
 
     // Pendiente del UML:
     // usarConsumible(item: Consumible, objetivo: Empleado): boolean
+
+    public List<Item> obtenerItems() {
+        return new ArrayList<>(items);
+    }
 }

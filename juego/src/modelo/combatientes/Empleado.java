@@ -91,4 +91,11 @@ public abstract class Empleado extends Combatiente {
     public int obtenerExperiencia() {
         return experiencia;
     }
+    public Herramienta obtenerHerramienta() {
+        return herramienta;
+    }
+
+    public Proteccion obtenerProteccion() {
+        return proteccion;
+    }
 }
