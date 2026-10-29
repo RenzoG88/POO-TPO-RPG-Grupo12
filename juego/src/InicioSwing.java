@@ -15,8 +15,10 @@ public class InicioSwing {
             ControladorEquipo controlador =
                     new ControladorEquipo(equipo, pantalla);
 
-            controlador.refrescarVista();
+            // Esta es la línea nueva:
+            pantalla.conectarControlador(controlador);
 
+            controlador.refrescarVista();
             pantalla.setVisible(true);
         });
     }

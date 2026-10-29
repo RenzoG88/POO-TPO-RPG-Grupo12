@@ -5,6 +5,9 @@ import modelo.inventario.Inventario;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import modelo.inventario.Equipamiento;
+import modelo.inventario.Herramienta;
+import modelo.inventario.Proteccion;
 
 public class Equipo implements Serializable {
 
@@ -61,5 +64,63 @@ public class Equipo implements Serializable {
 
     public Inventario obtenerInventario() {
         return inventario;
+    }
+    public boolean equipar(Empleado empleado, Equipamiento objeto) {
+        if (!pertenece(empleado) || objeto == null) {
+            return false;
+        }
+
+        if (empleado.estaDespedido()) {
+            return false;
+        }
+
+        if (!(objeto instanceof Herramienta)
+                && !(objeto instanceof Proteccion)) {
+            return false;
+        }
+
+        // El mismo objeto no puede estar equipado en dos empleados.
+        for (Empleado integrante : empleados) {
+            if (integrante.obtenerHerramienta() == objeto
+                    || integrante.obtenerProteccion() == objeto) {
+                return false;
+            }
+        }
+
+        // Solo podemos equipar objetos disponibles en el inventario.
+        if (!inventario.retirarItem(objeto)) {
+            return false;
+        }
+
+        Equipamiento anterior;
+
+        if (objeto instanceof Herramienta) {
+            anterior = empleado.cambiarHerramienta((Herramienta) objeto);
+        } else {
+            anterior = empleado.cambiarProteccion((Proteccion) objeto);
+        }
+
+        if (anterior != null) {
+            inventario.agregarItem(anterior);
+        }
+
+        return true;
+    }
+
+    public boolean desequipar(Empleado empleado, Equipamiento objeto) {
+        if (!pertenece(empleado) || objeto == null) {
+            return false;
+        }
+
+        if (empleado.obtenerHerramienta() == objeto) {
+            empleado.cambiarHerramienta(null);
+        } else if (empleado.obtenerProteccion() == objeto) {
+            empleado.cambiarProteccion(null);
+        } else {
+            return false;
+        }
+
+        inventario.agregarItem(objeto);
+        return true;
     }
 }

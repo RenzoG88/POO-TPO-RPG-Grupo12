@@ -10,11 +10,16 @@ public class EmpleadoDTO {
     private final int energiaActual;
     private final int energiaMaxima;
     private final boolean despedido;
+    private final int ataque;
+    private final int defensa;
+    private final String herramienta;
+    private final String proteccion;
 
     public EmpleadoDTO(String nombre, int nivel, int experiencia,
                        int vidaActual, int vidaMaxima,
                        int energiaActual, int energiaMaxima,
-                       boolean despedido) {
+                       boolean despedido, int ataque, int defensa,
+                       String herramienta, String proteccion) {
         this.nombre = nombre;
         this.nivel = nivel;
         this.experiencia = experiencia;
@@ -23,6 +28,10 @@ public class EmpleadoDTO {
         this.energiaActual = energiaActual;
         this.energiaMaxima = energiaMaxima;
         this.despedido = despedido;
+        this.ataque = ataque;
+        this.defensa = defensa;
+        this.herramienta = herramienta;
+        this.proteccion = proteccion;
     }
 
     public String getNombre() {
@@ -55,5 +64,21 @@ public class EmpleadoDTO {
 
     public boolean isDespedido() {
         return despedido;
+    }
+
+    public int getAtaque() {
+        return ataque;
+    }
+
+    public int getDefensa() {
+        return defensa;
+    }
+
+    public String getHerramienta() {
+        return herramienta;
+    }
+
+    public String getProteccion() {
+        return proteccion;
     }
 }
