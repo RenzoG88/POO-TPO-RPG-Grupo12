@@ -1,6 +1,5 @@
-import controlador.ControladorEquipo;
-import modelo.partida.Partida;
-import vista.PantallaEquipo;
+import controlador.ControladorInicio;
+import vista.organizador.PantallaInicio;
 
 import javax.swing.SwingUtilities;
 
@@ -8,16 +7,9 @@ public class InicioSwing {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            Partida partida = new Partida();
-
-            PantallaEquipo pantalla = new PantallaEquipo();
-
-            ControladorEquipo controlador =
-                    new ControladorEquipo(partida, pantalla);
-
+            PantallaInicio pantalla = new PantallaInicio();
+            ControladorInicio controlador = new ControladorInicio(pantalla);
             pantalla.conectarControlador(controlador);
-
-            controlador.refrescarVista();
             pantalla.setVisible(true);
         });
     }
