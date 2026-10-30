@@ -2,6 +2,8 @@ package modelo.partida;
 
 import modelo.combatientes.Empleado;
 import modelo.combatientes.Equipo;
+import modelo.combatientes.Enemigo;
+import modelo.combate.Batalla;
 import modelo.inventario.Equipamiento;
 import modelo.inventario.Consumible;
 import modelo.inventario.Oferta;
@@ -17,6 +19,9 @@ public class Partida implements Serializable {
 
     private Equipo equipo;
     private Tienda tienda;
+    // Solo se guarda en preparacion o eleccion de mejora, nunca durante una batalla.
+    private transient Batalla batallaActual;
+    private transient GeneradorEncuentros generador;
     private EtapaPartida etapa;
     private int ciclo;
     private int estres;
@@ -30,6 +35,8 @@ public class Partida implements Serializable {
 
     public void iniciarNueva() {
         equipo = new Equipo();
+        batallaActual = null;
+        generador = new GeneradorEncuentros();
         etapa = EtapaPartida.PREPARACION;
         ciclo = 1;
         estres = 0;
@@ -37,6 +44,90 @@ public class Partida implements Serializable {
         multiplicadorCreditos = 1.0;
         tienda = new Tienda();
         tienda.renovarOfertas(ciclo);
+    }
+
+    public Batalla iniciarSiguienteCombate() {
+        if (etapa != EtapaPartida.PREPARACION) {
+            throw new IllegalStateException("Solo se inicia un combate desde preparacion");
+        }
+        if (equipo.estanTodosDespedidos()) {
+            etapa = EtapaPartida.FINALIZADA;
+            throw new IllegalStateException("No quedan empleados activos");
+        }
+
+        boolean esJefe = estres >= limiteEstres;
+        // Recompensas iniciales de balance: normal 40 XP/30 creditos; jefe 100 XP/80.
+        Recompensa recompensa = new Recompensa(esJefe ? 100 : 40, esJefe ? 80 : 30);
+        Batalla nueva = new Batalla(equipo, generador.crearEnemigos(ciclo, esJefe),
+                esJefe, recompensa);
+        nueva.iniciar();
+        batallaActual = nueva;
+        etapa = EtapaPartida.COMBATE;
+        return batallaActual;
+    }
+
+    public void procesarFinCombate() {
+        if (etapa != EtapaPartida.COMBATE || batallaActual == null
+                || !batallaActual.estaFinalizada()) {
+            return;
+        }
+
+        if (!batallaActual.fueVictoria() || equipo.estanTodosDespedidos()) {
+            limpiarEstadosDelCombate();
+            batallaActual = null;
+            etapa = EtapaPartida.FINALIZADA;
+            return;
+        }
+
+        Recompensa recompensa = batallaActual.obtenerRecompensa();
+        int experiencia = recompensa.calcularExperiencia(multiplicadorExperiencia);
+        int creditos = recompensa.calcularCreditos(multiplicadorCreditos);
+        boolean eraJefe = batallaActual.esCombateJefe();
+        limpiarEstadosDelCombate();
+        equipo.repartirExperiencia(experiencia);
+        equipo.obtenerInventario().agregarCreditos(creditos);
+        batallaActual = null;
+
+        // Cambiar la etapa y quitar la batalla impide cobrar el mismo resultado dos veces.
+        if (eraJefe) {
+            etapa = EtapaPartida.ELECCION_MEJORA;
+        } else {
+            estres++;
+            entrarEnPreparacion();
+        }
+    }
+
+    public boolean elegirMejora(TipoMejora tipo) {
+        if (etapa != EtapaPartida.ELECCION_MEJORA || tipo == null) {
+            return false;
+        }
+        if (tipo == TipoMejora.EXPERIENCIA) {
+            multiplicadorExperiencia += 0.20;
+        } else {
+            multiplicadorCreditos += 0.20;
+        }
+        ciclo++;
+        estres = 0;
+        entrarEnPreparacion();
+        return true;
+    }
+
+    private void entrarEnPreparacion() {
+        etapa = EtapaPartida.PREPARACION;
+        tienda.renovarOfertas(ciclo);
+    }
+
+    private void limpiarEstadosDelCombate() {
+        for (Empleado empleado : equipo.obtenerEmpleados()) {
+            empleado.limpiarEstados();
+        }
+        for (Enemigo enemigo : batallaActual.obtenerEnemigos()) {
+            enemigo.limpiarEstados();
+        }
+    }
+
+    public Batalla obtenerBatallaActual() {
+        return batallaActual;
     }
 
     public boolean comprar(Oferta oferta) {
@@ -115,6 +206,7 @@ public class Partida implements Serializable {
     private void readObject(ObjectInputStream entrada)
             throws IOException, ClassNotFoundException {
         entrada.defaultReadObject();
+        generador = new GeneradorEncuentros();
 
         if (tienda == null) {
             if (ciclo < 1) {

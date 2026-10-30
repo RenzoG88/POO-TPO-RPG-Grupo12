@@ -3,9 +3,12 @@ package modelo.combatientes;
 public class UsuarioPhishing extends Enemigo {
 
     private static final long serialVersionUID = 1L;
+    public static final int VIDA_BASE = 80;
+    public static final int ATAQUE_BASE = 22;
+    public static final int DEFENSA_BASE = 5;
 
     public UsuarioPhishing() {
-        this(80, 22, 5);
+        this(VIDA_BASE, ATAQUE_BASE, DEFENSA_BASE);
     }
 
     public UsuarioPhishing(int vidaMaxima, int ataque, int defensa) {
@@ -14,7 +17,7 @@ public class UsuarioPhishing extends Enemigo {
 
     @Override
     public void ejecutarAccion(Equipo equipo) {
-        if (!estaActivo()) {
+        if (!puedeActuar()) {
             return;
         }
 
