@@ -1,4 +1,4 @@
-package vista;
+package vista.organizador;
 
 import controlador.ControladorEquipo;
 import dto.EmpleadoDTO;
@@ -17,6 +17,10 @@ public class PantallaEquipo extends JFrame {
     private final JLabel etiquetaProgreso;
     private final JPanel panelEmpleados;
     private ControladorEquipo controlador;
+    private final JButton botonAvanzar = new JButton("Iniciar combate 1/5");
+    private final JButton botonGuardar = new JButton("Guardar partida");
+    private final JButton botonTienda = new JButton("Tienda");
+    private final JButton botonConsumible = new JButton("Usar consumible");
 
     public PantallaEquipo() {
         setTitle("RPG informatico - Preparacion");
@@ -53,7 +57,6 @@ public class PantallaEquipo extends JFrame {
         JPanel acciones = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         acciones.setOpaque(false);
 
-        JButton botonGuardar = new JButton("Guardar partida");
         botonGuardar.addActionListener(evento -> {
             if (controlador != null) {
                 controlador.guardarPartida();
@@ -67,7 +70,6 @@ public class PantallaEquipo extends JFrame {
             }
         });
 
-        JButton botonTienda = new JButton("Tienda");
         botonTienda.addActionListener(evento -> {
             if (controlador != null) {
                 controlador.abrirTienda();
@@ -79,7 +81,6 @@ public class PantallaEquipo extends JFrame {
                 controlador.mostrarInventario();
             }
         });
-        JButton botonConsumible = new JButton("Usar consumible");
         botonConsumible.addActionListener(evento -> {
             if (controlador != null) {
                 controlador.gestionarConsumibles();
@@ -90,7 +91,57 @@ public class PantallaEquipo extends JFrame {
         acciones.add(botonConsumible);
         acciones.add(botonGuardar);
         acciones.add(botonCargar);
-        principal.add(acciones, BorderLayout.SOUTH);
+        JButton botonNueva = new JButton("Nueva partida");
+        botonNueva.addActionListener(evento -> {
+            if (controlador != null) { controlador.iniciarNuevaPartida(); }
+        });
+        botonAvanzar.addActionListener(evento -> {
+            if (controlador != null) { controlador.iniciarCombate(); }
+        });
+        JPanel progreso = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        progreso.setOpaque(false);
+        progreso.add(botonNueva);
+        progreso.add(botonAvanzar);
+        JPanel pie = new JPanel(new GridLayout(2, 1, 0, 4));
+        pie.setOpaque(false);
+        pie.add(acciones);
+        pie.add(progreso);
+        principal.add(pie, BorderLayout.SOUTH);
+    }
+
+    public void mostrarEtapa(String etapa, String accion, boolean preparacion,
+                             boolean permiteGuardar, boolean permiteContinuar) {
+        etiquetaProgreso.setText(etiquetaProgreso.getText() + " | " + etapa);
+        botonAvanzar.setText(accion);
+        botonAvanzar.setEnabled(permiteContinuar);
+        botonTienda.setEnabled(preparacion);
+        botonConsumible.setEnabled(preparacion);
+        botonGuardar.setEnabled(permiteGuardar);
+        habilitarEquipamiento(panelEmpleados, preparacion);
+    }
+
+    private void habilitarEquipamiento(Container panel, boolean habilitar) {
+        for (Component componente : panel.getComponents()) {
+            if (componente instanceof JButton) { componente.setEnabled(habilitar); }
+            if (componente instanceof Container) {
+                habilitarEquipamiento((Container) componente, habilitar);
+            }
+        }
+    }
+
+    public int elegirMejora() {
+        String[] opciones = {"Más experiencia (+0,20)", "Más créditos (+0,20)"};
+        return JOptionPane.showOptionDialog(this,
+                "Completaste las cinco batallas y el jefe. Elegí una mejora para el próximo ciclo."
+                        + "\nSi cerrás esta ventana, podés elegirla después o guardar la partida.",
+                "Ciclo completado", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
+                null, opciones, opciones[0]);
+    }
+
+    public boolean confirmarNuevaPartida() {
+        return JOptionPane.showConfirmDialog(this,
+                "Se reemplazará la partida abierta. Los cambios sin guardar se perderán. ¿Continuar?",
+                "Nueva partida", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
     }
 
     public void conectarControlador(ControladorEquipo controlador) {

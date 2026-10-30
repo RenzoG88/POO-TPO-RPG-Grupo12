@@ -3,7 +3,7 @@ import modelo.combatientes.Equipo;
 import modelo.inventario.Herramienta;
 import modelo.inventario.Proteccion;
 import modelo.partida.Partida;
-import vista.PantallaEquipo;
+import vista.organizador.PantallaEquipo;
 
 import javax.swing.SwingUtilities;
 

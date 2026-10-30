@@ -13,9 +13,14 @@ import modelo.inventario.Item;
 import modelo.inventario.Proteccion;
 import modelo.partida.Partida;
 import modelo.partida.PersistenciaPartida;
+import modelo.partida.EtapaPartida;
+import modelo.partida.TipoMejora;
+import modelo.combate.Batalla;
 
 import java.io.IOException;
-import vista.PantallaEquipo;
+import vista.organizador.PantallaEquipo;
+import vista.organizador.PantallaBatalla;
+import javax.swing.SwingUtilities;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +35,63 @@ public class ControladorEquipo {
         this.partida = partida;
         this.persistencia = new PersistenciaPartida();
         this.vista = vista;
+    }
+
+    public void iniciarCombate() {
+        if (partida.obtenerEtapa() == EtapaPartida.ELECCION_MEJORA) {
+            elegirMejora();
+            return;
+        }
+        if (partida.obtenerEtapa() != EtapaPartida.PREPARACION) {
+            vista.mostrarMensaje("Para volver a jugar, iniciá una nueva partida.");
+            return;
+        }
+        Batalla batalla;
+        try {
+            batalla = partida.iniciarSiguienteCombate();
+        } catch (IllegalStateException error) {
+            refrescarVista();
+            vista.mostrarMensaje(error.getMessage());
+            return;
+        }
+        PantallaBatalla pantalla = new PantallaBatalla(vista);
+        ControladorBatalla controladorBatalla = new ControladorBatalla(batalla, pantalla);
+        // El diálogo modal sigue atendiendo botones y el Timer en el hilo de Swing.
+        SwingUtilities.invokeLater(controladorBatalla::iniciar);
+        pantalla.setVisible(true);
+
+        int experiencia = batalla.obtenerRecompensa()
+                .calcularExperiencia(partida.obtenerMultiplicadorExperiencia());
+        int creditos = batalla.obtenerRecompensa()
+                .calcularCreditos(partida.obtenerMultiplicadorCreditos());
+        partida.procesarFinCombate();
+        refrescarVista();
+        if (batalla.fueVictoria()) {
+            vista.mostrarMensaje((batalla.esCombateJefe() ? "¡Venciste al jefe!" : "¡Victoria!")
+                    + "\nRecompensa: " + creditos + " créditos y " + experiencia
+                    + " XP para cada empleado activo.");
+            if (partida.obtenerEtapa() == EtapaPartida.ELECCION_MEJORA) {
+                elegirMejora();
+            }
+        } else {
+            vista.mostrarMensaje("El equipo quedó sin empleados activos. Fin de la partida."
+                    + "\nPodés iniciar una nueva partida o cargar un guardado.");
+        }
+    }
+
+    private void elegirMejora() {
+        int eleccion = vista.elegirMejora();
+        if (eleccion == 0 || eleccion == 1) {
+            partida.elegirMejora(eleccion == 0 ? TipoMejora.EXPERIENCIA : TipoMejora.CREDITOS);
+        }
+        refrescarVista();
+    }
+
+    public void iniciarNuevaPartida() {
+        if (vista.confirmarNuevaPartida()) {
+            partida.iniciarNueva();
+            refrescarVista();
+        }
     }
 
     public void abrirTienda() {
@@ -197,6 +259,12 @@ public class ControladorEquipo {
         vista.mostrarEquipo(datos, equipo.obtenerInventario().obtenerCreditos());
         vista.mostrarProgreso(partida.obtenerCiclo(), partida.obtenerEstres(),
                 partida.obtenerLimiteEstres());
+        String accion = partida.obtenerEtapa() == EtapaPartida.ELECCION_MEJORA
+                ? "Elegir mejora" : partida.obtenerEstres() >= partida.obtenerLimiteEstres()
+                ? "Enfrentar al jefe" : "Iniciar combate " + (partida.obtenerEstres() + 1) + "/5";
+        vista.mostrarEtapa(partida.obtenerEtapa().name(), accion,
+                partida.obtenerEtapa() == EtapaPartida.PREPARACION,
+                partida.puedeGuardar(), !partida.estaFinalizada());
     }
 
     public void gestionarEquipamiento(int indiceEmpleado) {

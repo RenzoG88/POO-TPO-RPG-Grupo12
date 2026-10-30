@@ -1,7 +1,7 @@
 import controlador.ControladorEquipo;
 import modelo.combatientes.Empleado;
 import modelo.partida.Partida;
-import vista.PantallaEquipo;
+import vista.organizador.PantallaEquipo;
 
 import javax.swing.SwingUtilities;
 
