@@ -1,228 +1,127 @@
-package modelo.combatientes;
+package modelo.partida;
 
-import modelo.inventario.Inventario;
+import modelo.combatientes.Empleado;
+import modelo.combatientes.Equipo;
+import modelo.inventario.Equipamiento;
 import modelo.inventario.Consumible;
+import modelo.inventario.Oferta;
+import modelo.inventario.Tienda;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import modelo.inventario.Equipamiento;
-import modelo.inventario.Herramienta;
-import modelo.inventario.Proteccion;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 
-public class Equipo implements Serializable {
+public class Partida implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private List<Empleado> empleados;
-    private Inventario inventario;
+    private Equipo equipo;
+    private Tienda tienda;
+    private EtapaPartida etapa;
+    private int ciclo;
+    private int estres;
+    private final int limiteEstres = 5;
+    private double multiplicadorExperiencia;
+    private double multiplicadorCreditos;
 
-    public Equipo() {
-        empleados = new ArrayList<>();
-        empleados.add(new Ciberseguridad());
-        empleados.add(new Infraestructura());
-        empleados.add(new Backend());
-        empleados.add(new Frontend());
-
-        inventario = new Inventario();
+    public Partida() {
+        iniciarNueva();
     }
 
-    public List<Empleado> obtenerEmpleados() {
-        return new ArrayList<>(empleados);
+    public void iniciarNueva() {
+        equipo = new Equipo();
+        etapa = EtapaPartida.PREPARACION;
+        ciclo = 1;
+        estres = 0;
+        multiplicadorExperiencia = 1.0;
+        multiplicadorCreditos = 1.0;
+        tienda = new Tienda();
+        tienda.renovarOfertas(ciclo);
     }
 
-    public List<Empleado> obtenerActivos() {
-        List<Empleado> activos = new ArrayList<>();
-
-        for (Empleado empleado : empleados) {
-            if (empleado.estaActivo()) {
-                activos.add(empleado);
-            }
+    public boolean comprar(Oferta oferta) {
+        if (etapa != EtapaPartida.PREPARACION) {
+            return false;
         }
 
-        return activos;
-    }
-
-    public boolean pertenece(Empleado empleado) {
-        return empleados.contains(empleado);
-    }
-
-    public boolean estanTodosDespedidos() {
-        return obtenerActivos().isEmpty();
-    }
-
-    public void repartirExperiencia(int cantidad) {
-        if (cantidad < 0) {
-            throw new IllegalArgumentException(
-                    "La experiencia no puede ser negativa"
-            );
-        }
-
-        for (Empleado empleado : obtenerActivos()) {
-            empleado.ganarExperiencia(cantidad);
-        }
+        return tienda.comprar(oferta, equipo.obtenerInventario());
     }
 
     public boolean usarConsumible(Consumible item, Empleado objetivo) {
-        if (!pertenece(objetivo) || objetivo.estaDespedido()) {
+        if (etapa != EtapaPartida.PREPARACION) {
             return false;
         }
 
-        return inventario.usarConsumible(item, objetivo);
+        return equipo.usarConsumible(item, objetivo);
     }
 
-    public Inventario obtenerInventario() {
-        return inventario;
-    }
     public boolean equipar(Empleado empleado, Equipamiento objeto) {
-        if (!pertenece(empleado) || objeto == null) {
+        if (etapa != EtapaPartida.PREPARACION) {
             return false;
         }
 
-        if (empleado.estaDespedido()) {
-            return false;
-        }
-
-        if (!(objeto instanceof Herramienta)
-                && !(objeto instanceof Proteccion)) {
-            return false;
-        }
-
-        // El mismo objeto no puede estar equipado en dos empleados.
-        for (Empleado integrante : empleados) {
-            if (integrante.obtenerHerramienta() == objeto
-                    || integrante.obtenerProteccion() == objeto) {
-                return false;
-            }
-        }
-
-        // Solo podemos equipar objetos disponibles en el inventario.
-        if (!inventario.retirarItem(objeto)) {
-            return false;
-        }
-
-        Equipamiento anterior;
-
-        if (objeto instanceof Herramienta) {
-            anterior = empleado.cambiarHerramienta((Herramienta) objeto);
-        } else {
-            anterior = empleado.cambiarProteccion((Proteccion) objeto);
-        }
-
-        if (anterior != null) {
-            inventario.agregarItem(anterior);
-        }
-
-        return true;
+        return equipo.equipar(empleado, objeto);
     }
 
     public boolean desequipar(Empleado empleado, Equipamiento objeto) {
-        if (!pertenece(empleado) || objeto == null) {
+        if (etapa != EtapaPartida.PREPARACION) {
             return false;
         }
 
-        if (empleado.obtenerHerramienta() == objeto) {
-            empleado.cambiarHerramienta(null);
-        } else if (empleado.obtenerProteccion() == objeto) {
-            empleado.cambiarProteccion(null);
-        } else {
-            return false;
-        }
-
-        inventario.agregarItem(objeto);
-        return true;
-    }
-}
-
+        return equipo.desequipar(empleado, objeto);
     }
 
-    public boolean pertenece(Empleado empleado) {
-        return empleados.contains(empleado);
+    public boolean puedeGuardar() {
+        return etapa == EtapaPartida.PREPARACION
+                || etapa == EtapaPartida.ELECCION_MEJORA;
     }
 
-    public boolean estanTodosDespedidos() {
-        return obtenerActivos().isEmpty();
+    public boolean estaFinalizada() {
+        return etapa == EtapaPartida.FINALIZADA;
     }
 
-    public void repartirExperiencia(int cantidad) {
-        if (cantidad < 0) {
-            throw new IllegalArgumentException(
-                    "La experiencia no puede ser negativa"
-            );
-        }
-
-        for (Empleado empleado : obtenerActivos()) {
-            empleado.ganarExperiencia(cantidad);
-        }
+    public Equipo obtenerEquipo() {
+        return equipo;
     }
 
-    public boolean usarConsumible(Consumible item, Empleado objetivo) {
-        if (!pertenece(objetivo) || objetivo.estaDespedido()) {
-            return false;
-        }
-
-        return inventario.usarConsumible(item, objetivo);
+    public Tienda obtenerTienda() {
+        return tienda;
     }
 
-    public Inventario obtenerInventario() {
-        return inventario;
+    public EtapaPartida obtenerEtapa() {
+        return etapa;
     }
-    public boolean equipar(Empleado empleado, Equipamiento objeto) {
-        if (!pertenece(empleado) || objeto == null) {
-            return false;
-        }
 
-        if (empleado.estaDespedido()) {
-            return false;
-        }
+    public int obtenerCiclo() {
+        return ciclo;
+    }
 
-        if (!(objeto instanceof Herramienta)
-                && !(objeto instanceof Proteccion)) {
-            return false;
-        }
+    public int obtenerEstres() {
+        return estres;
+    }
 
-        // El mismo objeto no puede estar equipado en dos empleados.
-        for (Empleado integrante : empleados) {
-            if (integrante.obtenerHerramienta() == objeto
-                    || integrante.obtenerProteccion() == objeto) {
-                return false;
+    public int obtenerLimiteEstres() {
+        return limiteEstres;
+    }
+
+    public double obtenerMultiplicadorExperiencia() {
+        return multiplicadorExperiencia;
+    }
+
+    public double obtenerMultiplicadorCreditos() {
+        return multiplicadorCreditos;
+    }
+    // Compatibilidad con los guardados del paso 4, que todavia no tenian tienda.
+    private void readObject(ObjectInputStream entrada)
+            throws IOException, ClassNotFoundException {
+        entrada.defaultReadObject();
+
+        if (tienda == null) {
+            if (ciclo < 1) {
+                throw new IOException("El guardado tiene un ciclo invalido.");
             }
+            tienda = new Tienda();
+            tienda.renovarOfertas(ciclo);
         }
-
-        // Solo podemos equipar objetos disponibles en el inventario.
-        if (!inventario.retirarItem(objeto)) {
-            return false;
-        }
-
-        Equipamiento anterior;
-
-        if (objeto instanceof Herramienta) {
-            anterior = empleado.cambiarHerramienta((Herramienta) objeto);
-        } else {
-            anterior = empleado.cambiarProteccion((Proteccion) objeto);
-        }
-
-        if (anterior != null) {
-            inventario.agregarItem(anterior);
-        }
-
-        return true;
-    }
-
-    public boolean desequipar(Empleado empleado, Equipamiento objeto) {
-        if (!pertenece(empleado) || objeto == null) {
-            return false;
-        }
-
-        if (empleado.obtenerHerramienta() == objeto) {
-            empleado.cambiarHerramienta(null);
-        } else if (empleado.obtenerProteccion() == objeto) {
-            empleado.cambiarProteccion(null);
-        } else {
-            return false;
-        }
-
-        inventario.agregarItem(objeto);
-        return true;
     }
 }
