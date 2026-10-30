@@ -1,9 +1,14 @@
 package modelo.inventario;
 
+import java.io.Serializable;
+import modelo.combatientes.Empleado;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class Inventario {
+public class Inventario implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private int creditos;
     private List<Item> items;
@@ -47,6 +52,10 @@ public class Inventario {
             );
         }
 
+        if (items.contains(item)) {
+            throw new IllegalArgumentException("El mismo objeto ya esta en el inventario");
+        }
+
         items.add(item);
     }
 
@@ -54,8 +63,14 @@ public class Inventario {
         return items.remove(item);
     }
 
-    // Pendiente del UML:
-    // usarConsumible(item: Consumible, objetivo: Empleado): boolean
+    public boolean usarConsumible(Consumible item, Empleado objetivo) {
+        if (item == null || !contiene(item) || !item.puedeAplicarse(objetivo)) {
+            return false;
+        }
+
+        item.aplicar(objetivo);
+        return retirarItem(item);
+    }
 
     public List<Item> obtenerItems() {
         return new ArrayList<>(items);

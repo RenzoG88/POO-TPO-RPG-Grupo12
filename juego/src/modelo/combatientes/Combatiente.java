@@ -1,6 +1,13 @@
 package modelo.combatientes;
 
 import java.io.Serializable;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.ArrayList;
+import java.util.List;
+import modelo.combate.Habilidad;
+import modelo.estadostemporales.EfectoEstado;
+import modelo.estadostemporales.GestorEstados;
 
 public abstract class Combatiente implements Serializable {
 
@@ -15,6 +22,8 @@ public abstract class Combatiente implements Serializable {
     private int defensa;
     private int velocidad;
     private boolean defendiendo;
+    private List<Habilidad> habilidades = new ArrayList<>();
+    private GestorEstados gestorEstados = new GestorEstados();
 
     public Combatiente(String nombre, int vidaMaxima,
                        int energiaMaxima, int ataque,
@@ -56,11 +65,12 @@ public abstract class Combatiente implements Serializable {
             cantidad = Math.max(1, cantidad / 2);
         }
 
+        cantidad = gestorEstados.modificarDanio(cantidad);
         vida = Math.max(0, vida - cantidad);
     }
 
     public void atacar(Combatiente objetivo) {
-        if (!estaActivo() || objetivo == null || objetivo == this
+        if (!puedeActuar() || objetivo == null || objetivo == this
                 || !objetivo.estaActivo()) {
             return;
         }
@@ -72,7 +82,7 @@ public abstract class Combatiente implements Serializable {
     }
 
     public void defender() {
-        if (estaActivo()) {
+        if (puedeActuar()) {
             defendiendo = true;
         }
     }
@@ -80,6 +90,67 @@ public abstract class Combatiente implements Serializable {
     public void iniciarTurno() {
         // La defensa anterior termina al comenzar el siguiente turno propio.
         defendiendo = false;
+        gestorEstados.procesarInicio(this);
+    }
+
+    public boolean puedeActuar() {
+        return estaActivo() && gestorEstados.permiteActuar();
+    }
+
+    public void finalizarTurno() {
+        gestorEstados.finalizarTurno();
+    }
+
+    public void agregarEstado(EfectoEstado estado) {
+        if (estaActivo()) {
+            gestorEstados.agregar(estado);
+        }
+    }
+
+    public void limpiarEstados() {
+        gestorEstados.limpiar();
+        defendiendo = false;
+    }
+
+    public List<EfectoEstado> obtenerEstados() {
+        return gestorEstados.obtenerEstados();
+    }
+
+    protected void agregarHabilidad(Habilidad habilidad) {
+        if (habilidad == null) {
+            throw new IllegalArgumentException("La habilidad no puede ser null");
+        }
+        if (!habilidades.contains(habilidad)) {
+            habilidades.add(habilidad);
+        }
+    }
+
+    public List<Habilidad> obtenerHabilidades() {
+        return new ArrayList<>(habilidades);
+    }
+
+    public boolean usarHabilidad(Habilidad habilidad, Combatiente objetivo) {
+        if (!puedeActuar() || habilidad == null || !habilidades.contains(habilidad)
+                || !habilidad.objetivoValido(this, objetivo)) {
+            return false;
+        }
+        if (!gastarEnergia(habilidad.obtenerCostoEnergia())) {
+            return false;
+        }
+        habilidad.aplicar(this, objetivo);
+        return true;
+    }
+
+    private void readObject(ObjectInputStream entrada)
+            throws IOException, ClassNotFoundException {
+        entrada.defaultReadObject();
+        // Los guardados anteriores no tenian estas dos propiedades.
+        if (habilidades == null) {
+            habilidades = new ArrayList<>();
+        }
+        if (gestorEstados == null) {
+            gestorEstados = new GestorEstados();
+        }
     }
 
     public void curar(int cantidad) {
