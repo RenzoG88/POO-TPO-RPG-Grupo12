@@ -6,6 +6,10 @@ public class Proteccion extends Equipamiento {
 
     public Proteccion(String nombre, int bonusDefensa) {
         super(nombre);
+        if (bonusDefensa < 0) {
+            throw new IllegalArgumentException("El bonus de defensa no puede ser negativo");
+        }
+
         this.bonusDefensa = bonusDefensa;
     }
 

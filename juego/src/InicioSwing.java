@@ -1,5 +1,5 @@
 import controlador.ControladorEquipo;
-import modelo.combatientes.Equipo;
+import modelo.partida.Partida;
 import vista.PantallaEquipo;
 
 import javax.swing.SwingUtilities;
@@ -8,14 +8,13 @@ public class InicioSwing {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            Equipo equipo = new Equipo();
+            Partida partida = new Partida();
 
             PantallaEquipo pantalla = new PantallaEquipo();
 
             ControladorEquipo controlador =
-                    new ControladorEquipo(equipo, pantalla);
+                    new ControladorEquipo(partida, pantalla);
 
-            // Esta es la línea nueva:
             pantalla.conectarControlador(controlador);
 
             controlador.refrescarVista();

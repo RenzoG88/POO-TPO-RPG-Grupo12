@@ -7,6 +7,10 @@ import modelo.inventario.Equipamiento;
 import modelo.inventario.Herramienta;
 import modelo.inventario.Item;
 import modelo.inventario.Proteccion;
+import modelo.partida.Partida;
+import modelo.partida.PersistenciaPartida;
+
+import java.io.IOException;
 import vista.PantallaEquipo;
 
 import java.util.ArrayList;
@@ -14,15 +18,56 @@ import java.util.List;
 
 public class ControladorEquipo {
 
-    private final Equipo equipo;
+    private Partida partida;
+    private final PersistenciaPartida persistencia;
     private final PantallaEquipo vista;
 
-    public ControladorEquipo(Equipo equipo, PantallaEquipo vista) {
-        this.equipo = equipo;
+    public ControladorEquipo(Partida partida, PantallaEquipo vista) {
+        this.partida = partida;
+        this.persistencia = new PersistenciaPartida();
         this.vista = vista;
     }
 
+    public void guardarPartida() {
+        if (!partida.puedeGuardar()) {
+            vista.mostrarMensaje("No se puede guardar en esta etapa de la partida.");
+            return;
+        }
+
+        String ruta = vista.elegirRutaGuardado();
+
+        if (ruta == null) {
+            return;
+        }
+
+        try {
+            persistencia.guardar(partida, ruta);
+            vista.mostrarMensaje("Partida guardada correctamente.");
+        } catch (IOException | IllegalArgumentException | IllegalStateException error) {
+            vista.mostrarMensaje("No se pudo guardar la partida. " + error.getMessage());
+        }
+    }
+
+    public void cargarPartida() {
+        String ruta = vista.elegirRutaCarga();
+
+        if (ruta == null || !vista.confirmarCarga()) {
+            return;
+        }
+
+        try {
+            Partida cargada = persistencia.cargar(ruta);
+            // Se reemplaza la partida abierta solo despues de una carga correcta.
+            partida = cargada;
+            refrescarVista();
+            vista.mostrarMensaje("Partida cargada correctamente.");
+        } catch (IOException | ClassNotFoundException | IllegalArgumentException error) {
+            vista.mostrarMensaje("No se pudo cargar la partida. " + error.getMessage());
+        }
+    }
+
     public void refrescarVista() {
+        Equipo equipo = partida.obtenerEquipo();
         List<EmpleadoDTO> datos = new ArrayList<>();
 
         for (Empleado empleado : equipo.obtenerEmpleados()) {
@@ -48,10 +93,12 @@ public class ControladorEquipo {
         }
 
         vista.mostrarEquipo(datos, equipo.obtenerInventario().obtenerCreditos());
+        vista.mostrarProgreso(partida.obtenerCiclo(), partida.obtenerEstres(),
+                partida.obtenerLimiteEstres());
     }
 
     public void gestionarEquipamiento(int indiceEmpleado) {
-        List<Empleado> empleados = equipo.obtenerEmpleados();
+        List<Empleado> empleados = partida.obtenerEquipo().obtenerEmpleados();
 
         if (indiceEmpleado < 0 || indiceEmpleado >= empleados.size()) {
             vista.mostrarMensaje("No se encontro el empleado seleccionado.");
@@ -81,7 +128,7 @@ public class ControladorEquipo {
     private void equiparDesdeInventario(Empleado empleado) {
         List<Equipamiento> disponibles = new ArrayList<>();
 
-        for (Item item : equipo.obtenerInventario().obtenerItems()) {
+        for (Item item : partida.obtenerEquipo().obtenerInventario().obtenerItems()) {
             if (item instanceof Equipamiento) {
                 disponibles.add((Equipamiento) item);
             }
@@ -116,9 +163,9 @@ public class ControladorEquipo {
         // Usamos el objeto de la misma lista que se mostro en el selector.
         Equipamiento elegido = disponibles.get(seleccion);
 
-        if (!equipo.equipar(empleado, elegido)) {
+        if (!partida.equipar(empleado, elegido)) {
             vista.mostrarMensaje("No se pudo equipar el objeto. El empleado debe estar "
-                    + "activo y el objeto debe estar disponible.");
+                    + "activo, el objeto disponible y la partida en preparacion.");
         }
     }
 
@@ -128,8 +175,9 @@ public class ControladorEquipo {
             return;
         }
 
-        if (!equipo.desequipar(empleado, objeto)) {
-            vista.mostrarMensaje("No se pudo retirar el equipamiento seleccionado.");
+        if (!partida.desequipar(empleado, objeto)) {
+            vista.mostrarMensaje("No se pudo retirar el equipamiento. El objeto debe "
+                    + "estar equipado y la partida debe estar en preparacion.");
         }
     }
 }

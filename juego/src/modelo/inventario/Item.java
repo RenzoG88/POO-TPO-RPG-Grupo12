@@ -1,6 +1,10 @@
 package modelo.inventario;
 
-public abstract class Item {
+import java.io.Serializable;
+
+public abstract class Item implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private String nombre;
 

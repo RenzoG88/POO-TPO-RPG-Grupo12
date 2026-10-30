@@ -1,6 +1,7 @@
 package modelo.combatientes;
 
 import modelo.inventario.Inventario;
+import modelo.inventario.Consumible;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -60,6 +61,14 @@ public class Equipo implements Serializable {
         for (Empleado empleado : obtenerActivos()) {
             empleado.ganarExperiencia(cantidad);
         }
+    }
+
+    public boolean usarConsumible(Consumible item, Empleado objetivo) {
+        if (!pertenece(objetivo) || objetivo.estaDespedido()) {
+            return false;
+        }
+
+        return inventario.usarConsumible(item, objetivo);
     }
 
     public Inventario obtenerInventario() {

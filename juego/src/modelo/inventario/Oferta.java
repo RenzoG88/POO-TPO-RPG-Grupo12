@@ -1,6 +1,10 @@
 package modelo.inventario;
 
-public class Oferta {
+import java.io.Serializable;
+
+public class Oferta implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Item item;
     private int precio;
@@ -17,7 +21,7 @@ public class Oferta {
 
         this.item = item;
         this.precio = precio;
-        this.vendida = false;
+        vendida = false;
     }
 
     public boolean estaDisponible() {
