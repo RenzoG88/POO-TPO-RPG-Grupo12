@@ -60,20 +60,20 @@ public class PruebaHabilidadesEmpleados {
         Habilidad proceso = backend.obtenerHabilidades().get(0);
         UsuarioPhishing rivalBackend = new UsuarioPhishing();
         verificar(backend.usarHabilidad(proceso, rivalBackend)
-                        && rivalBackend.obtenerVida() == 35 && backend.obtenerEnergia() == 70,
+                        && rivalBackend.obtenerVida() == 51 && backend.obtenerEnergia() == 70,
                 "Backend causa 45: floor(28 x 1.8) - 5, costo unico de 10");
         Herramienta herramienta = new Herramienta("Teclado mejorado", 10);
         equipo.obtenerInventario().agregarItem(herramienta);
         verificar(equipo.equipar(backend, herramienta), "Se equipa el teclado de prueba");
         UsuarioPhishing rivalEquipado = new UsuarioPhishing();
         verificar(backend.usarHabilidad(proceso, rivalEquipado)
-                        && rivalEquipado.obtenerVida() == 17,
+                        && rivalEquipado.obtenerVida() == 33,
                 "La habilidad de Backend incluye el bonus de la herramienta");
 
         Habilidad doble = frontend.obtenerHabilidades().get(0);
         UsuarioPhishing rivalFrontend = new UsuarioPhishing();
         verificar(frontend.usarHabilidad(doble, rivalFrontend)
-                        && rivalFrontend.obtenerVida() == 56 && frontend.obtenerEnergia() == 70,
+                        && rivalFrontend.obtenerVida() == 72 && frontend.obtenerEnergia() == 70,
                 "Frontend causa dos golpes de 12 y paga una sola vez");
 
         int energiaBackend = backend.obtenerEnergia();
@@ -92,7 +92,7 @@ public class PruebaHabilidadesEmpleados {
                 "Reparacion rechaza enemigos y objetivos inexistentes sin cobrar");
 
         frontend.gastarEnergia(frontend.obtenerEnergia());
-        verificar(!frontend.usarHabilidad(doble, rivalFrontend) && rivalFrontend.obtenerVida() == 56,
+        verificar(!frontend.usarHabilidad(doble, rivalFrontend) && rivalFrontend.obtenerVida() == 72,
                 "Sin energia no se ejecuta la habilidad");
         backend.agregarEstado(new TicketPendiente());
         verificar(!backend.usarHabilidad(proceso, rivalFrontend)

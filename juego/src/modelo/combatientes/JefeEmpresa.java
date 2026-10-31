@@ -7,8 +7,8 @@ import modelo.estadostemporales.TipoEstado;
 
 public class JefeEmpresa extends Enemigo {
     private static final long serialVersionUID = 1L;
-    public static final int VIDA_BASE = 280;
-    public static final int ATAQUE_BASE = 32;
+    public static final int VIDA_BASE = 336;
+    public static final int ATAQUE_BASE = 35;
     public static final int DEFENSA_BASE = 10;
     private final Habilidad ataquePotente;
     private final Habilidad burnout;

@@ -27,8 +27,14 @@ public class PanelEmpleado extends JPanel {
         nombre.setFont(new Font("SansSerif", Font.BOLD, 18));
         datos.add(nombre);
 
-        datos.add(new JLabel("Nivel " + empleado.getNivel()
-                + " | Experiencia: " + empleado.getExperiencia()));
+        JLabel experiencia = new JLabel("Nivel " + empleado.getNivel()
+                + " | Experiencia: " + empleado.getExperiencia()
+                + "/" + empleado.getExperienciaSiguienteNivel());
+        int restante = Math.max(0, empleado.getExperienciaSiguienteNivel()
+                - empleado.getExperiencia());
+        experiencia.setToolTipText("Faltan " + restante + " puntos para el nivel "
+                + (empleado.getNivel() + 1));
+        datos.add(experiencia);
 
         JLabel estado = new JLabel(
                 empleado.isDespedido() ? "Despedido" : "Activo"
@@ -49,10 +55,10 @@ public class PanelEmpleado extends JPanel {
         datos.add(proteccion);
 
         datos.add(crearBarra("Vida", empleado.getVidaActual(),
-                empleado.getVidaMaxima(), new Color(55, 150, 90)));
+                empleado.getVidaMaxima(), new Color(180, 60, 65)));
 
-        datos.add(crearBarra("Energia", empleado.getEnergiaActual(),
-                empleado.getEnergiaMaxima(), new Color(55, 125, 200)));
+        datos.add(crearBarra("Energía", empleado.getEnergiaActual(),
+                empleado.getEnergiaMaxima(), new Color(50, 120, 200)));
 
         add(datos, BorderLayout.CENTER);
 
@@ -87,12 +93,7 @@ public class PanelEmpleado extends JPanel {
 
     private JProgressBar crearBarra(String nombre, int actual,
                                     int maximo, Color color) {
-        JProgressBar barra = new JProgressBar(0, maximo);
-        barra.setValue(actual);
-        barra.setStringPainted(true);
-        barra.setString(nombre + ": " + actual + "/" + maximo);
-        barra.setForeground(color);
-        return barra;
+        return new BarraRecurso(nombre, actual, maximo, color);
     }
 }
 

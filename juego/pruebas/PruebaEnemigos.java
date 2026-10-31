@@ -21,19 +21,19 @@ public class PruebaEnemigos {
         Empleado ciber = equipo.obtenerEmpleados().get(0);
         UsuarioPhishing phishing = new UsuarioPhishing();
         phishing.ejecutarAccion(equipo);
-        verificar(ciber.obtenerVida() == 154, "Phishing ataca al primer empleado activo");
+        verificar(ciber.obtenerVida() == 152, "Phishing ataca al primer empleado activo");
 
         equipo = new Equipo();
         ciber = equipo.obtenerEmpleados().get(0);
         ClienteExigente cliente = new ClienteExigente();
         cliente.ejecutarAccion(equipo);
         cliente.ejecutarAccion(equipo);
-        verificar(ciber.obtenerVida() == 156 && cliente.obtenerEnergia() == 30
+        verificar(ciber.obtenerVida() == 154 && cliente.obtenerEnergia() == 30
                         && ciber.obtenerEstados().get(0).obtenerTipo() == TipoEstado.BURNOUT,
                 "Cliente alterna ataque y burnout de costo 10");
         ciber.iniciarTurno();
         ciber.finalizarTurno();
-        verificar(ciber.obtenerVida() == 151 && ciber.obtenerEstados().get(0).obtenerDuracion() == 2,
+        verificar(ciber.obtenerVida() == 149 && ciber.obtenerEstados().get(0).obtenerDuracion() == 2,
                 "Burnout quita 5 al inicio propio y descuenta duracion al cierre");
 
         equipo = new Equipo();
@@ -56,16 +56,16 @@ public class PruebaEnemigos {
         JefeEmpresa jefe = new JefeEmpresa();
         jefe.ejecutarAccion(equipo);
         jefe.ejecutarAccion(equipo);
-        verificar(ciber.obtenerVida() == 128 && jefe.obtenerEnergia() == 40
+        verificar(ciber.obtenerVida() == 124 && jefe.obtenerEnergia() == 40
                         && ciber.obtenerEstados().get(0).obtenerTipo() == TipoEstado.BURNOUT,
                 "El jefe alterna golpe x1.5 y burnout, con consumo de energia");
         ciber.recibirDanio(1000);
         jefe.ejecutarAccion(equipo);
-        verificar(equipo.obtenerEmpleados().get(1).obtenerVida() == 80,
+        verificar(equipo.obtenerEmpleados().get(1).obtenerVida() == 76,
                 "Los enemigos cambian de objetivo cuando el anterior es despedido");
         jefe.recibirDanio(10000);
         jefe.ejecutarAccion(equipo);
-        verificar(equipo.obtenerEmpleados().get(1).obtenerVida() == 80,
+        verificar(equipo.obtenerEmpleados().get(1).obtenerVida() == 76,
                 "Un enemigo derrotado no actua");
 
         equipo = new Equipo();
@@ -74,17 +74,17 @@ public class PruebaEnemigos {
         cliente.gastarEnergia(40);
         cliente.ejecutarAccion(equipo);
         cliente.ejecutarAccion(equipo);
-        verificar(ciber.obtenerVida() == 152 && ciber.obtenerEstados().isEmpty(),
+        verificar(ciber.obtenerVida() == 148 && ciber.obtenerEstados().isEmpty(),
                 "Sin energia la habilidad enemiga se reemplaza por ataque basico");
         cliente = new ClienteExigente();
         cliente.agregarEstado(new TicketPendiente());
         cliente.iniciarTurno();
         cliente.ejecutarAccion(equipo);
         cliente.finalizarTurno();
-        verificar(ciber.obtenerVida() == 152, "Un enemigo bloqueado tampoco puede actuar");
+        verificar(ciber.obtenerVida() == 148, "Un enemigo bloqueado tampoco puede actuar");
         cliente.iniciarTurno();
         cliente.ejecutarAccion(equipo);
-        verificar(ciber.obtenerVida() == 148 && ciber.obtenerEstados().isEmpty(),
+        verificar(ciber.obtenerVida() == 142 && ciber.obtenerEstados().isEmpty(),
                 "Perder el turno no avanza la alternancia del enemigo");
 
         AplicarEstado ataqueBurnout = new AplicarEstado("Burnout", 10, TipoEstado.BURNOUT, 3, 5);
@@ -137,8 +137,8 @@ public class PruebaEnemigos {
                 "Cada encuentro normal crea dos instancias de enemigos normales");
         Enemigo jefeEscalado = generador.crearEnemigos(2, true).get(0);
         verificar(jefeEscalado instanceof JefeEmpresa
-                        && jefeEscalado.obtenerVidaMaxima() == 322
-                        && jefeEscalado.obtenerAtaqueTotal() == 37
+                        && jefeEscalado.obtenerVidaMaxima() == 387
+                        && jefeEscalado.obtenerAtaqueTotal() == 41
                         && jefeEscalado.obtenerDefensaTotal() == 12,
                 "El ciclo 2 escala vida, ataque y defensa por 1.15, hacia arriba");
         verificar(generador.crearEnemigos(2, true).get(0) != jefeEscalado,

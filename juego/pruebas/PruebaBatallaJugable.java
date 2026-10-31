@@ -40,7 +40,7 @@ public class PruebaBatallaJugable {
         batalla.ejecutarTurnoEnemigo();
         verificar(batalla.obtenerCombatienteActual() == primero,
                 "No se puede ejecutar un enemigo durante el turno del jugador");
-        verificar(batalla.atacar(enemigo) && enemigo.obtenerVida() == 63
+        verificar(batalla.atacar(enemigo) && enemigo.obtenerVida() == 79
                         && batalla.obtenerCombatienteActual() instanceof Backend,
                 "Un ataque válido produce daño y avanza una sola vez");
         batalla.defender();
@@ -50,7 +50,7 @@ public class PruebaBatallaJugable {
         verificar(batalla.obtenerCombatienteActual() == enemigo && !batalla.atacar(enemigo),
                 "Durante el turno enemigo se rechazan acciones del jugador");
         batalla.ejecutarTurnoEnemigo();
-        verificar(equipo.obtenerEmpleados().get(0).obtenerVida() == 154
+        verificar(equipo.obtenerEmpleados().get(0).obtenerVida() == 152
                         && batalla.obtenerCombatienteActual() instanceof Ciberseguridad,
                 "El rival ejecuta su conducta y después actúa Ciberseguridad");
         batalla.defender();
@@ -110,7 +110,7 @@ public class PruebaBatallaJugable {
                         && frontend.obtenerEnergia() == 80,
                 "No se gastan recursos en una habilidad con objetivo ajeno");
         verificar(batalla.usarHabilidad(habilidad, rival) && frontend.obtenerEnergia() == 70
-                        && rival.obtenerVida() == 56,
+                        && rival.obtenerVida() == 72,
                 "Doble golpe descuenta energía una vez y consume un turno");
         verificar(!batalla.usarHabilidad(habilidad, rival), "Otro héroe no puede usar esa habilidad");
 
