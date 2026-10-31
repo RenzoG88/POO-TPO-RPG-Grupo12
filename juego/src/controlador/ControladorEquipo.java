@@ -95,44 +95,11 @@ public class ControladorEquipo {
     }
 
     public void abrirTienda() {
-        List<Oferta> ofertas = partida.obtenerTienda().obtenerOfertas();
-
-        if (ofertas.isEmpty()) {
-            vista.mostrarMensaje("No hay ofertas en la tienda.");
-            return;
-        }
-
-        String[] opciones = new String[ofertas.size()];
-        for (int i = 0; i < ofertas.size(); i++) {
-            Oferta oferta = ofertas.get(i);
-            opciones[i] = (i + 1) + ". " + describirItem(oferta.obtenerItem())
-                    + " | " + oferta.obtenerPrecio() + " creditos"
-                    + (oferta.estaDisponible() ? "" : " | VENDIDA");
-        }
-
-        int seleccion = vista.elegirOferta(opciones,
-                partida.obtenerEquipo().obtenerInventario().obtenerCreditos());
-        if (seleccion < 0 || seleccion >= ofertas.size()) {
-            return;
-        }
-
-        if (partida.comprar(ofertas.get(seleccion))) {
-            refrescarVista();
-            vista.mostrarMensaje("Compra realizada. El objeto esta en el inventario.");
-        } else {
-            vista.mostrarMensaje("No se pudo comprar. Revisa el saldo, la disponibilidad "
-                    + "de la oferta y que la partida este en preparacion.");
-        }
+        new ControladorObjetos(partida, vista, true, this::refrescarVista).mostrar();
     }
 
     public void mostrarInventario() {
-        List<Item> items = partida.obtenerEquipo().obtenerInventario().obtenerItems();
-        String[] descripciones = new String[items.size()];
-        for (int i = 0; i < items.size(); i++) {
-            descripciones[i] = (i + 1) + ". " + describirItem(items.get(i));
-        }
-        vista.mostrarInventario(descripciones,
-                partida.obtenerEquipo().obtenerInventario().obtenerCreditos());
+        new ControladorObjetos(partida, vista, false, this::refrescarVista).mostrar();
     }
 
     public void gestionarConsumibles() {
@@ -252,7 +219,8 @@ public class ControladorEquipo {
                     empleado.obtenerAtaqueTotal(),
                     empleado.obtenerDefensaTotal(),
                     herramienta,
-                    proteccion
+                    proteccion,
+                    empleado.obtenerExperienciaSiguienteNivel()
             ));
         }
 

@@ -56,6 +56,14 @@ public class Batalla {
         return gestorTurnos.obtenerRonda();
     }
 
+    public List<Combatiente> obtenerOrdenTurnos() {
+        return gestorTurnos.obtenerOrdenTurnos();
+    }
+
+    public int obtenerIndiceTurno() {
+        return gestorTurnos.obtenerIndiceTurno();
+    }
+
     public String obtenerRegistro() {
         return registro.toString();
     }

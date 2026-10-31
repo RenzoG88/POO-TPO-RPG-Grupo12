@@ -35,8 +35,8 @@ public abstract class Empleado extends Combatiente {
 
         experiencia += cantidad;
 
-        while (experiencia >= nivel * 100) {
-            experiencia -= nivel * 100;
+        while (experiencia >= obtenerExperienciaSiguienteNivel()) {
+            experiencia -= obtenerExperienciaSiguienteNivel();
             subirNivel();
         }
     }
@@ -91,6 +91,12 @@ public abstract class Empleado extends Combatiente {
     public int obtenerExperiencia() {
         return experiencia;
     }
+
+    /** Umbral total del nivel actual; no es la cantidad que falta ganar. */
+    public int obtenerExperienciaSiguienteNivel() {
+        return nivel * 100;
+    }
+
     public Herramienta obtenerHerramienta() {
         return herramienta;
     }

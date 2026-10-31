@@ -1,6 +1,7 @@
 package controlador;
 
 import dto.CombatienteDTO;
+import dto.TurnoDTO;
 import modelo.combate.Batalla;
 import modelo.combate.Habilidad;
 import modelo.combatientes.Combatiente;
@@ -132,7 +133,7 @@ public class ControladorBatalla {
         String[] nombres = new String[objetivos.size()];
         for (int i = 0; i < objetivos.size(); i++) {
             Combatiente objetivo = objetivos.get(i);
-            nombres[i] = (i + 1) + ". " + objetivo.obtenerNombre()
+            nombres[i] = (i + 1) + ". " + nombreVisible(objetivo)
                     + " | Vida " + objetivo.obtenerVida() + "/" + objetivo.obtenerVidaMaxima()
                     + " | EN " + objetivo.obtenerEnergia() + "/" + objetivo.obtenerEnergiaMaxima();
         }
@@ -156,16 +157,39 @@ public class ControladorBatalla {
         }
         String titulo = (batalla.esCombateJefe() ? "Jefe de la empresa" : "Combate")
                 + " | Ronda " + batalla.obtenerRonda();
-        String turno = actor == null ? "Combate terminado" : "Turno de " + actor.obtenerNombre()
+        String turno = actor == null ? "Combate terminado" : "Turno de " + nombreVisible(actor)
                 + (actor instanceof Empleado ? " — Elegí una acción" : " — Actúa automáticamente");
         vista.obtenerPanel().actualizar(titulo, turno, empleados, enemigos,
                 batalla.obtenerRegistro(), actor instanceof Empleado);
+        vista.obtenerPanel().mostrarOrdenTurnos(obtenerOrdenVisible());
         if (batalla.estaFinalizada()) {
             turnoEnemigo.stop();
             vista.dispose();
         } else if (actor instanceof Enemigo) {
             turnoEnemigo.restart();
         }
+    }
+
+    private List<TurnoDTO> obtenerOrdenVisible() {
+        List<TurnoDTO> datos = new ArrayList<>();
+        List<Combatiente> orden = batalla.obtenerOrdenTurnos();
+        Combatiente actual = batalla.obtenerCombatienteActual();
+        for (int i = 0; i < orden.size(); i++) {
+            Combatiente participante = orden.get(i);
+            boolean esActual = participante == actual;
+            String estado = !participante.estaActivo() ? "Fuera de combate"
+                    : esActual ? "TURNO ACTUAL"
+                    : i < batalla.obtenerIndiceTurno() ? "Turno terminado" : "Pendiente";
+            datos.add(new TurnoDTO(i + 1, nombreVisible(participante),
+                    participante.obtenerVelocidad(), estado, esActual));
+        }
+        return datos;
+    }
+
+    private String nombreVisible(Combatiente personaje) {
+        int indice = batalla.obtenerEnemigos().indexOf(personaje);
+        // El número coincide con la tarjeta: distingue dos enemigos del mismo tipo.
+        return indice < 0 ? personaje.obtenerNombre() : personaje.obtenerNombre() + " #" + (indice + 1);
     }
 
     private CombatienteDTO crearDatos(Combatiente personaje, boolean actual) {
@@ -175,7 +199,7 @@ public class ControladorBatalla {
             estados.append(estado.obtenerTipo()).append(" (")
                     .append(estado.obtenerDuracion()).append(")");
         }
-        return new CombatienteDTO(personaje.obtenerNombre(),
+        return new CombatienteDTO(nombreVisible(personaje),
                 personaje.getClass().getSimpleName().toLowerCase(Locale.ROOT) + ".png",
                 personaje.obtenerVida(), personaje.obtenerVidaMaxima(),
                 personaje.obtenerEnergia(), personaje.obtenerEnergiaMaxima(),

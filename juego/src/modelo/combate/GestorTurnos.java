@@ -40,6 +40,15 @@ public class GestorTurnos {
         return ronda;
     }
 
+    /** Copia del orden de esta ronda; incluye los turnos ya terminados. */
+    public List<Combatiente> obtenerOrdenTurnos() {
+        return new ArrayList<>(ordenTurnos);
+    }
+
+    public int obtenerIndiceTurno() {
+        return indiceTurno;
+    }
+
     private void iniciarRonda() {
         ordenTurnos = new ArrayList<>();
         for (Combatiente participante : participantes) {

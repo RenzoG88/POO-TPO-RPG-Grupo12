@@ -6,8 +6,8 @@ import modelo.estadostemporales.TipoEstado;
 
 public class ClienteExigente extends Enemigo {
     private static final long serialVersionUID = 1L;
-    public static final int VIDA_BASE = 120;
-    public static final int ATAQUE_BASE = 20;
+    public static final int VIDA_BASE = 144;
+    public static final int ATAQUE_BASE = 22;
     public static final int DEFENSA_BASE = 4;
     private final Habilidad burnout;
     private boolean usarEspecial;

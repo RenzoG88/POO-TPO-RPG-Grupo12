@@ -1,8 +1,8 @@
 package vista.paneles;
 
 import dto.CombatienteDTO;
+import dto.TurnoDTO;
 import javax.swing.*;
-import javax.swing.plaf.basic.BasicProgressBarUI;
 import java.awt.*;
 import java.net.URL;
 import java.util.HashMap;
@@ -13,6 +13,7 @@ import java.util.Map;
 public class PanelBatalla extends JPanel {
     private final JLabel titulo = new JLabel();
     private final JLabel turno = new JLabel();
+    private final PanelOrdenTurnos ordenTurnos = new PanelOrdenTurnos();
     private final JPanel aliados = new JPanel(new GridLayout(2, 2, 8, 8));
     private final JPanel enemigos = new JPanel(new GridLayout(0, 1, 8, 8));
     private final JTextArea registro = new JTextArea(5, 60);
@@ -24,7 +25,7 @@ public class PanelBatalla extends JPanel {
 
     public PanelBatalla() {
         setLayout(new BorderLayout(12, 12));
-        setPreferredSize(new Dimension(1120, 680));
+        setPreferredSize(new Dimension(1120, 760));
         setBackground(new Color(240, 243, 247));
         setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
 
@@ -34,7 +35,11 @@ public class PanelBatalla extends JPanel {
         turno.setFont(new Font("SansSerif", Font.BOLD, 16));
         cabecera.add(titulo);
         cabecera.add(turno);
-        add(cabecera, BorderLayout.NORTH);
+        JPanel superior = new JPanel(new BorderLayout(0, 8));
+        superior.setOpaque(false);
+        superior.add(cabecera, BorderLayout.NORTH);
+        superior.add(ordenTurnos, BorderLayout.CENTER);
+        add(superior, BorderLayout.NORTH);
 
         JPanel bandos = new JPanel(new GridLayout(1, 2, 12, 0));
         bandos.setOpaque(false);
@@ -103,6 +108,10 @@ public class PanelBatalla extends JPanel {
         objeto.setEnabled(habilitar);
     }
 
+    public void mostrarOrdenTurnos(List<TurnoDTO> turnos) {
+        ordenTurnos.actualizar(turnos);
+    }
+
     private JPanel crearTarjeta(CombatienteDTO dato) {
         JPanel tarjeta = new JPanel(new BorderLayout(8, 6));
         tarjeta.setBackground(Color.WHITE);
@@ -139,15 +148,7 @@ public class PanelBatalla extends JPanel {
     }
 
     private JProgressBar crearBarra(String nombre, int actual, int maximo, Color color) {
-        JProgressBar barra = new JProgressBar(0, Math.max(1, maximo));
-        barra.setUI(new BasicProgressBarUI());
-        barra.setForeground(color);
-        barra.setBackground(new Color(235, 238, 242));
-        barra.setValue(actual);
-        barra.setStringPainted(true);
-        barra.setString(nombre + ": " + actual + "/" + maximo);
-        barra.setFont(new Font("SansSerif", Font.BOLD, 11));
-        return barra;
+        return new BarraRecurso(nombre, actual, maximo, color);
     }
 
     private ImageIcon obtenerImagen(String archivo) {

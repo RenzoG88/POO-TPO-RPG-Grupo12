@@ -5,6 +5,7 @@ public class EmpleadoDTO {
     private final String nombre;
     private final int nivel;
     private final int experiencia;
+    private final int experienciaSiguienteNivel;
     private final int vidaActual;
     private final int vidaMaxima;
     private final int energiaActual;
@@ -19,10 +20,12 @@ public class EmpleadoDTO {
                        int vidaActual, int vidaMaxima,
                        int energiaActual, int energiaMaxima,
                        boolean despedido, int ataque, int defensa,
-                       String herramienta, String proteccion) {
+                       String herramienta, String proteccion,
+                       int experienciaSiguienteNivel) {
         this.nombre = nombre;
         this.nivel = nivel;
         this.experiencia = experiencia;
+        this.experienciaSiguienteNivel = experienciaSiguienteNivel;
         this.vidaActual = vidaActual;
         this.vidaMaxima = vidaMaxima;
         this.energiaActual = energiaActual;
@@ -44,6 +47,10 @@ public class EmpleadoDTO {
 
     public int getExperiencia() {
         return experiencia;
+    }
+
+    public int getExperienciaSiguienteNivel() {
+        return experienciaSiguienteNivel;
     }
 
     public int getVidaActual() {
