@@ -8,6 +8,11 @@ public class Infraestructura extends Empleado {
 
     private static final long serialVersionUID = 1L;
 
+    @Override
+    public TipoPersonaje obtenerTipoPersonaje() {
+        return TipoPersonaje.INFRAESTRUCTURA;
+    }
+
     public Infraestructura() {
         super("Infraestructura", 120, 100, 12, 8, 10);
         registrarHabilidadInicial();

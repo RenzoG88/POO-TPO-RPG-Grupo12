@@ -11,13 +11,13 @@ import modelo.estadostemporales.EfectoEstado;
 import modelo.inventario.Consumible;
 import modelo.inventario.Item;
 import vista.organizador.PantallaBatalla;
+import vista.recursos.SpritesPersonajes;
 
 import javax.swing.Timer;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class ControladorBatalla {
     private final Batalla batalla;
@@ -200,7 +200,7 @@ public class ControladorBatalla {
                     .append(estado.obtenerDuracion()).append(")");
         }
         return new CombatienteDTO(nombreVisible(personaje),
-                personaje.getClass().getSimpleName().toLowerCase(Locale.ROOT) + ".png",
+                SpritesPersonajes.archivoPara(personaje.obtenerTipoPersonaje()),
                 personaje.obtenerVida(), personaje.obtenerVidaMaxima(),
                 personaje.obtenerEnergia(), personaje.obtenerEnergiaMaxima(),
                 personaje.obtenerAtaqueTotal(), personaje.obtenerDefensaTotal(),

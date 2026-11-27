@@ -8,6 +8,11 @@ public class Backend extends Empleado {
 
     private static final long serialVersionUID = 1L;
 
+    @Override
+    public TipoPersonaje obtenerTipoPersonaje() {
+        return TipoPersonaje.BACKEND;
+    }
+
     public Backend() {
         super("Backend", 110, 80, 28, 6, 12);
         registrarHabilidadInicial();

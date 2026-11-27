@@ -8,6 +8,11 @@ public class Frontend extends Empleado {
 
     private static final long serialVersionUID = 1L;
 
+    @Override
+    public TipoPersonaje obtenerTipoPersonaje() {
+        return TipoPersonaje.FRONTEND;
+    }
+
     public Frontend() {
         super("Frontend", 100, 80, 22, 5, 18);
         registrarHabilidadInicial();

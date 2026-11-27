@@ -11,6 +11,10 @@ import modelo.estadostemporales.GestorEstados;
 
 public abstract class Combatiente implements Serializable {
 
+    public TipoPersonaje obtenerTipoPersonaje() {
+        return TipoPersonaje.DESCONOCIDO;
+    }
+
     private static final long serialVersionUID = 1L;
 
     private String nombre;
