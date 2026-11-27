@@ -1,0 +1,8 @@
+**
+!Dockerfile
+!docker/
+!docker/**
+!juego/
+!juego/src/
+!juego/src/**
+**/*.class

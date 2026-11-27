@@ -1,0 +1,29 @@
+services:
+  juego:
+    build: .
+    init: true
+    ports:
+      - "127.0.0.1:${GAME_PORT:-6080}:6080"
+    environment:
+      JAVA_MAIN_CLASS: ${JAVA_MAIN_CLASS:-InicioSwing}
+    shm_size: 256mb
+    # Evita que x11vnc recorra un limite de archivos enorme heredado del host.
+    ulimits:
+      nofile:
+        soft: 4096
+        hard: 4096
+    healthcheck:
+      test:
+        - CMD
+        - python3
+        - -c
+        - |
+          import socket, urllib.request
+          with urllib.request.urlopen('http://127.0.0.1:6080/vnc.html', timeout=2) as response:
+              assert response.status == 200
+          with socket.create_connection(('127.0.0.1', 5900), timeout=2) as connection:
+              assert connection.makefile('rb').read(12).startswith(b'RFB ')
+      interval: 10s
+      timeout: 3s
+      start_period: 20s
+      retries: 3
