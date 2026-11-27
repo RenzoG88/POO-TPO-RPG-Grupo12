@@ -7,6 +7,11 @@ import modelo.estadostemporales.TipoEstado;
 
 public class JefeEmpresa extends Enemigo {
     private static final long serialVersionUID = 1L;
+
+    @Override
+    public TipoPersonaje obtenerTipoPersonaje() {
+        return TipoPersonaje.JEFE;
+    }
     public static final int VIDA_BASE = 336;
     public static final int ATAQUE_BASE = 35;
     public static final int DEFENSA_BASE = 10;

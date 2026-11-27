@@ -3,6 +3,11 @@ package modelo.combatientes;
 public class UsuarioPhishing extends Enemigo {
 
     private static final long serialVersionUID = 1L;
+
+    @Override
+    public TipoPersonaje obtenerTipoPersonaje() {
+        return TipoPersonaje.PHISHING;
+    }
     public static final int VIDA_BASE = 96;
     public static final int ATAQUE_BASE = 24;
     public static final int DEFENSA_BASE = 5;

@@ -3,10 +3,6 @@ package modelo.combate;
 import modelo.combatientes.Combatiente;
 import modelo.combatientes.Empleado;
 import modelo.combatientes.Enemigo;
-import modelo.estadostemporales.Burnout;
-import modelo.estadostemporales.EfectoEstado;
-import modelo.estadostemporales.FirewallActivo;
-import modelo.estadostemporales.TicketPendiente;
 import modelo.estadostemporales.TipoEstado;
 
 public class AplicarEstado extends Habilidad {
@@ -44,20 +40,8 @@ public class AplicarEstado extends Habilidad {
     @Override
     public void aplicar(Combatiente emisor, Combatiente objetivo) {
         if (objetivoValido(emisor, objetivo)) {
-            objetivo.agregarEstado(crearEstado());
+            objetivo.agregarEstado(tipo.crearEfecto(duracion, potencia));
         }
     }
 
-    private EfectoEstado crearEstado() {
-        switch (tipo) {
-            case BURNOUT:
-                return new Burnout(duracion, potencia);
-            case TICKET_PENDIENTE:
-                return new TicketPendiente(duracion);
-            case FIREWALL_ACTIVO:
-                return new FirewallActivo(duracion, potencia);
-            default:
-                throw new IllegalStateException("Tipo de estado desconocido");
-        }
-    }
 }

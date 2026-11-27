@@ -66,23 +66,23 @@ public class Partida implements Serializable {
         return batallaActual;
     }
 
-    public void procesarFinCombate() {
+    public ResultadoBatalla procesarFinCombate() {
         if (etapa != EtapaPartida.COMBATE || batallaActual == null
                 || !batallaActual.estaFinalizada()) {
-            return;
+            return null;
         }
 
+        boolean eraJefe = batallaActual.esCombateJefe();
         if (!batallaActual.fueVictoria() || equipo.estanTodosDespedidos()) {
             limpiarEstadosDelCombate();
             batallaActual = null;
             etapa = EtapaPartida.FINALIZADA;
-            return;
+            return new ResultadoBatalla(false, eraJefe, ciclo, 0, 0);
         }
 
         Recompensa recompensa = batallaActual.obtenerRecompensa();
         int experiencia = recompensa.calcularExperiencia(multiplicadorExperiencia);
         int creditos = recompensa.calcularCreditos(multiplicadorCreditos);
-        boolean eraJefe = batallaActual.esCombateJefe();
         limpiarEstadosDelCombate();
         equipo.repartirExperiencia(experiencia);
         equipo.obtenerInventario().agregarCreditos(creditos);
@@ -95,6 +95,7 @@ public class Partida implements Serializable {
             estres++;
             entrarEnPreparacion();
         }
+        return new ResultadoBatalla(true, eraJefe, ciclo, experiencia, creditos);
     }
 
     public boolean elegirMejora(TipoMejora tipo) {

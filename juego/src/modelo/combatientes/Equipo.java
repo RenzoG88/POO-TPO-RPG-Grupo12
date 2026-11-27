@@ -7,8 +7,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import modelo.inventario.Equipamiento;
-import modelo.inventario.Herramienta;
-import modelo.inventario.Proteccion;
 
 public class Equipo implements Serializable {
 
@@ -83,15 +81,9 @@ public class Equipo implements Serializable {
             return false;
         }
 
-        if (!(objeto instanceof Herramienta)
-                && !(objeto instanceof Proteccion)) {
-            return false;
-        }
-
         // El mismo objeto no puede estar equipado en dos empleados.
         for (Empleado integrante : empleados) {
-            if (integrante.obtenerHerramienta() == objeto
-                    || integrante.obtenerProteccion() == objeto) {
+            if (objeto.estaEquipadoEn(integrante)) {
                 return false;
             }
         }
@@ -101,13 +93,7 @@ public class Equipo implements Serializable {
             return false;
         }
 
-        Equipamiento anterior;
-
-        if (objeto instanceof Herramienta) {
-            anterior = empleado.cambiarHerramienta((Herramienta) objeto);
-        } else {
-            anterior = empleado.cambiarProteccion((Proteccion) objeto);
-        }
+        Equipamiento anterior = objeto.equiparEn(empleado);
 
         if (anterior != null) {
             inventario.agregarItem(anterior);
@@ -121,11 +107,7 @@ public class Equipo implements Serializable {
             return false;
         }
 
-        if (empleado.obtenerHerramienta() == objeto) {
-            empleado.cambiarHerramienta(null);
-        } else if (empleado.obtenerProteccion() == objeto) {
-            empleado.cambiarProteccion(null);
-        } else {
+        if (!objeto.desequiparDe(empleado)) {
             return false;
         }
 
